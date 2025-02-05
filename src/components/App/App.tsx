@@ -17,9 +17,7 @@ import { FilmsList } from '../FilmsList/FilmsList';
 export const App: React.FC = () => {
   const [inputText, setInputText] = useState<string>('');
   const [apiMovieList, setApiMovieList] = useState<Movie[]>([]);
-  const [apiMovieListRated, setApiMovieListRated] = useState<
-    Movie[] | undefined
-  >([]);
+  const [apiMovieListRated, setApiMovieListRated] = useState<Movie[]>([]);
   const [loadingStatus, setLoadingStatus] = useState<boolean>(false);
   const [errorAlert, setErrorAlert] = useState<boolean>(false);
   const [totalResults, setTotalResults] = useState<number>(0);
@@ -116,7 +114,7 @@ export const App: React.FC = () => {
       try {
         setLoadingStatus(true);
         const apiGet = await ratingList();
-        if (apiGet.success) {
+        if (apiGet.results.length !== 0) {
           setApiMovieListRated(apiGet.results);
           setPageCountRate(apiGet.total_pages);
         } else {

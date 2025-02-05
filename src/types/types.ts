@@ -5,7 +5,7 @@ export interface MovieResponse {
   results: Movie[];
   total_results: number;
   total_pages: number;
-  success: boolean;
+  ok?: boolean;
 }
 export interface GenresResponse {
   genres: СontextApp[];
