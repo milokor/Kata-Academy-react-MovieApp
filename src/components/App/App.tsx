@@ -17,7 +17,9 @@ import { FilmsList } from '../FilmsList/FilmsList';
 export const App: React.FC = () => {
   const [inputText, setInputText] = useState<string>('');
   const [apiMovieList, setApiMovieList] = useState<Movie[]>([]);
-  const [apiMovieListRated, setApiMovieListRated] = useState<Movie[]>([]);
+  const [apiMovieListRated, setApiMovieListRated] = useState<
+    Movie[] | undefined
+  >([]);
   const [loadingStatus, setLoadingStatus] = useState<boolean>(false);
   const [errorAlert, setErrorAlert] = useState<boolean>(false);
   const [totalResults, setTotalResults] = useState<number>(0);
@@ -27,6 +29,7 @@ export const App: React.FC = () => {
   const [tabsPage, setTabsPage] = useState<number>(1);
   const setObjectRatingMovie = useState<RatingMovie>({})[1];
   const [pageCountRate, setPageCountRate] = useState<number>(1);
+
   const onInputText = (event: React.ChangeEvent<HTMLInputElement>): void => {
     if (event.target.value.trim()) {
       setInputText(event.target.value);
@@ -113,16 +116,21 @@ export const App: React.FC = () => {
       try {
         setLoadingStatus(true);
         const apiGet = await ratingList();
-        setApiMovieListRated(apiGet.results);
-        setPageCountRate(apiGet.total_pages);
+        if (apiGet.success) {
+          setApiMovieListRated(apiGet.results);
+          setPageCountRate(apiGet.total_pages);
+        } else {
+          setApiMovieListRated([]);
+        }
       } catch {
         setErrorAlert(true);
       } finally {
         setLoadingStatus(false);
       }
     };
-    apiGetRating();
+
     if (tabsPage === 2) {
+      apiGetRating();
       setApiMovieList([]);
       setPageCount(1);
     }
@@ -178,10 +186,14 @@ export const App: React.FC = () => {
       ),
       2: (
         <>
-          <FilmsList
-            {...filmsListContentProps}
-            apiMovieList={apiMovieListRated}
-          />
+          {apiMovieListRated?.length === 0 ? (
+            <Alert type="warning" message="No rated films" />
+          ) : (
+            <FilmsList
+              {...filmsListContentProps}
+              apiMovieList={apiMovieListRated || []}
+            />
+          )}
           <Pagination {...paginationProps} total={pageCountRate} />
         </>
       ),
@@ -189,7 +201,6 @@ export const App: React.FC = () => {
 
     return contentMap[tabsPageNumber];
   };
-
   return (
     <div>
       <Online>
