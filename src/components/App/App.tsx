@@ -1,7 +1,7 @@
 import { Pagination, Alert, Input } from 'antd';
 import './App.css';
 import { Offline, Online } from 'react-detect-offline';
-import React, { useState, useEffect, JSX } from 'react';
+import React, { useState, useEffect, JSX, useMemo, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { TabHeader } from '../TabHeader/TabHeader';
 import {
@@ -37,7 +37,7 @@ export const App: React.FC = () => {
     }
   };
 
-  const apiGetFunction = async (): Promise<void> => {
+  const apiGetFunction = useCallback(async (): Promise<void> => {
     try {
       setErrorAlert(false);
       setLoadingStatus(true);
@@ -50,7 +50,7 @@ export const App: React.FC = () => {
     } finally {
       setLoadingStatus(false);
     }
-  };
+  }, [inputText, pageCurrent]);
 
   useEffect(() => {
     const apiGetGenres = async (): Promise<void> => {
@@ -134,9 +134,17 @@ export const App: React.FC = () => {
     }
   }, [tabsPage]);
 
-  const debounceApiGet = debounce(apiGetFunction, 1000);
+  const debouncedApiGet = useMemo(
+    () => debounce(apiGetFunction, 1000),
+    [apiGetFunction],
+  );
+
   useEffect(() => {
-    debounceApiGet();
+    debouncedApiGet();
+
+    return () => {
+      debouncedApiGet.cancel();
+    };
   }, [inputText, pageCurrent]);
 
   const renderContentApp = (tabsPageNumber: number): JSX.Element | null => {
